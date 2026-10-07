@@ -11,7 +11,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-dummy-key-for-dev')
 DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
 ALLOWED_HOSTS = ['*']
-CSRF_TRUSTED_ORIGINS = ['https://*.railway.app', 'https://*.up.railway.app']
+CSRF_TRUSTED_ORIGINS = ['https://*.railway.app', 'https://*.up.railway.app', 'https://*.onrender.com']
 
 INSTALLED_APPS = [
     'django.contrib.admin',
