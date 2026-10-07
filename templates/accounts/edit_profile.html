@@ -54,7 +54,8 @@
                         {% for photo in profile.gallery_photos.all %}
                         <div class="col-4 text-center">
                             <img src="{{ photo.image.url }}" class="w-100 rounded mb-2 border border-secondary" style="aspect-ratio: 1; object-fit: cover;">
-                            <form action="/profile/delete_photo/{{ photo.id }}/" method="POST">
+                         
+                                <form action="/profile/photo/delete/{{ photo.id }}/" method="POST">
                                 {% csrf_token %}
                                 <button type="submit" class="btn btn-sm btn-outline-danger w-100">Delete</button>
                             </form>
