@@ -1,0 +1,164 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Chat with {{ other_user.display_name }} - Garba with Aayra{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card bg-dark border-secondary">
+                <!-- Chat Header -->
+                <div class="card-header border-secondary d-flex align-items-center gap-3 p-3">
+                    <a href="/dashboard/" class="text-white text-decoration-none">← Back</a>
+                    {% if other_user.profile_photo %}
+                    <img src="{{ other_user.profile_photo.url }}" class="rounded-circle" style="width:40px;height:40px;object-fit:cover;">
+                    {% else %}
+                    <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center" style="width:40px;height:40px;">👤</div>
+                    {% endif %}
+                    <h5 class="mb-0 fw-bold"><a href="/profile/{{ other_user.id }}/" class="text-white text-decoration-none">{{ other_user.display_name }}</a></h5>
+                </div>
+
+                <!-- Chat Body -->
+                <div class="card-body" style="height: 400px; overflow-y: auto;" id="chatBox">
+                    {% for msg in messages %}
+                        <div class="d-flex mb-3 {% if msg.sender == user.profile %}justify-content-end{% endif %}">
+                            <div class="p-3 rounded position-relative {% if msg.sender == user.profile %}bg-primary text-white{% else %}bg-secondary text-white{% endif %}" style="max-width: 75%;">
+                                {% if msg.message %}<p class="mb-1">{{ msg.message }}</p>{% endif %}
+                                {% if msg.attachment %}
+                                    {% if 'image' in msg.attachment.url or 'jpg' in msg.attachment.url or 'png' in msg.attachment.url %}
+                                        <img src="{{ msg.attachment.url }}" style="max-width: 100%; border-radius: 10px; margin-bottom: 5px;">
+                                    {% else %}
+                                        <a href="{{ msg.attachment.url }}" target="_blank" class="text-warning d-block mb-1">📁 Download File</a>
+                                    {% endif %}
+                                {% endif %}
+                                
+                                <div class="d-flex justify-content-between align-items-center mt-1">
+                                    <small class="opacity-50" style="font-size: 0.7em;">{{ msg.created_at|time:"H:i" }}</small>
+                                    
+                                    <!-- Reaction buttons -->
+                                    <div class="dropdown">
+                                        <button class="btn btn-sm btn-link text-white text-decoration-none p-0 ms-2 dropdown-toggle dropdown-toggle-split" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="font-size: 0.8em; opacity: 0.7;">
+                                            +
+                                        </button>
+                                        <ul class="dropdown-menu bg-dark border-secondary p-1" style="min-width: auto; flex-direction: row; display: flex; gap: 5px;">
+                                            <li><button class="dropdown-item p-1 btn btn-sm bg-transparent" onclick="sendReaction({{ msg.id }}, '👍')">👍</button></li>
+                                            <li><button class="dropdown-item p-1 btn btn-sm bg-transparent" onclick="sendReaction({{ msg.id }}, '❤️')">❤️</button></li>
+                                            <li><button class="dropdown-item p-1 btn btn-sm bg-transparent" onclick="sendReaction({{ msg.id }}, '😂')">😂</button></li>
+                                            <li><button class="dropdown-item p-1 btn btn-sm bg-transparent" onclick="sendReaction({{ msg.id }}, '💃')">💃</button></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                
+                                <!-- Display Reaction if exists -->
+                                {% if msg.reaction %}
+                                <div class="position-absolute" style="bottom: -10px; right: -5px; background: #222; border-radius: 50%; padding: 2px 5px; font-size: 0.8em; box-shadow: 0 0 5px rgba(0,0,0,0.5);">
+                                    {{ msg.reaction }}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% empty %}
+                        <p class="text-center opacity-50" id="noMessages">Say hello to {{ other_user.display_name }}!</p>
+                    {% endfor %}
+                </div>
+
+                <!-- Chat Input -->
+                <div class="card-footer border-secondary p-2 p-md-3">
+                    <form id="chatForm" onsubmit="sendMessage(event)" enctype="multipart/form-data">
+                        <div class="d-flex flex-wrap gap-2 mb-2 d-md-none">
+                            <button type="button" class="btn btn-sm btn-outline-secondary flex-fill" onclick="addEmoji('💃')">💃</button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary flex-fill" onclick="addEmoji('🕺')">🕺</button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary flex-fill" onclick="addEmoji('❤️')">❤️</button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary flex-fill" onclick="addEmoji('😂')">😂</button>
+                        </div>
+                        <div class="input-group">
+                            <input type="file" id="chatFile" name="attachment" class="form-control bg-dark text-white border-secondary" style="max-width: 90px;" title="Attach File">
+                            <button type="button" class="btn btn-outline-secondary d-none d-md-block" onclick="addEmoji('💃')">💃</button>
+                            <button type="button" class="btn btn-outline-secondary d-none d-md-block" onclick="addEmoji('🕺')">🕺</button>
+                            <button type="button" class="btn btn-outline-secondary d-none d-md-block" onclick="addEmoji('❤️')">❤️</button>
+                            <input type="text" id="chatInput" name="message" class="form-control bg-dark text-white border-secondary" placeholder="Type message...">
+                            <button type="submit" class="btn btn-primary px-3">Send</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const chatBox = document.getElementById('chatBox');
+    chatBox.scrollTop = chatBox.scrollHeight;
+
+    function addEmoji(emoji) {
+        document.getElementById('chatInput').value += emoji;
+    }
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    async function sendMessage(event) {
+        event.preventDefault();
+        const input = document.getElementById('chatInput');
+        const fileInput = document.getElementById('chatFile');
+        const text = input.value;
+        const file = fileInput.files[0];
+
+        if (!text && !file) return;
+
+        const formData = new FormData();
+        formData.append('message', text);
+        if (file) {
+            formData.append('attachment', file);
+        }
+
+        try {
+            const response = await fetch(`/chat/{{ match.id }}/send/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken'),
+                },
+                body: formData
+            });
+
+            if (response.ok) {
+                window.location.reload();
+            } else {
+                alert("Failed to send message.");
+            }
+        } catch (e) {
+            alert("Error sending message.");
+        }
+    }
+
+    async function sendReaction(messageId, emoji) {
+        try {
+            const response = await fetch(`/chat/react/${messageId}/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken'),
+                },
+                body: JSON.stringify({ reaction: emoji })
+            });
+            if (response.ok) {
+                window.location.reload();
+            }
+        } catch (e) {
+            console.error("Failed to react", e);
+        }
+    }
+</script>
+{% endblock %}

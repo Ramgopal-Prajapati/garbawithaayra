@@ -1,0 +1,143 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Main Admin Dashboard - Garba with Aayra{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold text-warning">🛡️ Main Admin Dashboard</h2>
+        <span class="badge bg-danger rounded-pill px-3 py-2">Superuser Access Only</span>
+    </div>
+
+    <div class="row mb-5 g-4">
+        <div class="col-md-4">
+            <div class="card bg-dark border-secondary p-4 text-center h-100">
+                <h1 class="display-4 fw-bold text-primary">{{ users.count }}</h1>
+                <p class="text-muted mb-0">Total Registered Users</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-dark border-secondary p-4 text-center h-100">
+                <h1 class="display-4 fw-bold text-warning">{{ pending_count }}</h1>
+                <p class="text-muted mb-0">Pending Verification</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-dark border-secondary p-4 text-center h-100">
+                <h1 class="display-4 fw-bold text-success">{{ approved_count }}</h1>
+                <p class="text-muted mb-0">Approved Users</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="card bg-dark border-secondary">
+        <div class="card-body p-0 table-responsive">
+            <table class="table table-dark table-hover mb-0 align-middle">
+                <thead>
+                    <tr>
+                        <th class="p-3">User Details</th>
+                        <th class="p-3">Age & Joined</th>
+                        <th class="p-3">Status</th>
+                        <th class="p-3">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for profile in users %}
+                    <tr>
+                        <td class="p-3">
+                            <div class="d-flex align-items-center gap-3">
+                                {% if profile.profile_photo %}
+                                <img src="{{ profile.profile_photo.url }}" class="rounded-circle" style="width:50px;height:50px;object-fit:cover;">
+                                {% else %}
+                                <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center" style="width:50px;height:50px;">👤</div>
+                                {% endif %}
+                                <div>
+                                    <h6 class="mb-0 fw-bold">{{ profile.display_name }} <span class="text-warning small">@{{ profile.username }}</span></h6>
+                                    <small class="text-muted">{{ profile.user.email }}</small><br>
+                                    <small class="text-muted">{{ profile.user.phone }}</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="p-3">
+                            <small class="d-block">📅 Age: {{ profile.age|default:"N/A" }}</small>
+                            <small class="text-muted">Joined: {{ profile.created_at|date:"M d, Y" }}</small>
+                        </td>
+                        <td class="p-3">
+                            {% if profile.verification_status == 'APPROVED' %}
+                            <span class="badge bg-success rounded-pill">Approved</span>
+                            {% elif profile.verification_status == 'PENDING' %}
+                            <span class="badge bg-warning text-dark rounded-pill">Pending</span>
+                            {% else %}
+                            <span class="badge bg-danger rounded-pill">Rejected</span>
+                            {% endif %}
+                        </td>
+                        <td class="p-3">
+                            <button type="button" class="btn btn-sm btn-outline-light rounded-pill" data-bs-toggle="modal" data-bs-target="#reviewModal{{ profile.id }}">Review</button>
+                            {% if profile.verification_status == 'PENDING' %}
+                            <a href="/mainadmin/approve/{{ profile.id }}/" class="btn btn-sm btn-success rounded-pill">Approve</a>
+                            <a href="/mainadmin/reject/{{ profile.id }}/" class="btn btn-sm btn-warning rounded-pill text-dark">Reject</a>
+                            {% endif %}
+                            <a href="/mainadmin/delete/{{ profile.user.id }}/" class="btn btn-sm btn-danger rounded-pill" onclick="return confirm('Are you sure you want to permanently delete this user? This cannot be undone.');">Delete</a>
+                        </td>
+                    </tr>
+                    
+                    <!-- Review Modal for {{ profile.display_name }} -->
+                    <div class="modal fade" id="reviewModal{{ profile.id }}" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered modal-lg text-dark">
+                            <div class="modal-content bg-light">
+                                <div class="modal-header border-bottom-0">
+                                    <h5 class="modal-title fw-bold">Review: {{ profile.display_name }} (@{{ profile.username }})</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="row">
+                                        <div class="col-md-4 text-center">
+                                            {% if profile.profile_photo %}
+                                            <img src="{{ profile.profile_photo.url }}" class="rounded-circle mb-3 border border-3 border-dark" style="width:120px;height:120px;object-fit:cover;">
+                                            {% else %}
+                                            <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center mx-auto mb-3 border border-3 border-dark" style="width:120px;height:120px;">👤</div>
+                                            {% endif %}
+                                            <p class="mb-1 fw-bold">{{ profile.user.email }}</p>
+                                            <p class="small text-muted mb-0">Phone: {{ profile.user.phone }}</p>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <h6 class="fw-bold border-bottom pb-2 mb-3">Profile Information</h6>
+                                            <p><strong>Age:</strong> {{ profile.age|default:"N/A" }}</p>
+                                            <p><strong>Bio:</strong> {{ profile.bio|default:"N/A" }}</p>
+                                            
+                                            <h6 class="fw-bold border-bottom pb-2 mt-4 mb-3">Gallery Photos</h6>
+                                            <div class="d-flex gap-2 flex-wrap">
+                                                {% for photo in profile.gallery_photos.all %}
+                                                <img src="{{ photo.image.url }}" class="rounded border border-secondary" style="width: 80px; height: 80px; object-fit: cover;">
+                                                {% empty %}
+                                                <p class="small text-muted">No gallery photos uploaded.</p>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer border-top-0 justify-content-center bg-white rounded-bottom">
+                                    {% if profile.verification_status == 'PENDING' %}
+                                    <a href="/mainadmin/approve/{{ profile.id }}/" class="btn btn-success px-4 rounded-pill fw-bold">✓ Approve User</a>
+                                    <a href="/mainadmin/reject/{{ profile.id }}/" class="btn btn-warning px-4 rounded-pill fw-bold text-dark">✕ Reject User</a>
+                                    {% else %}
+                                    <button type="button" class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">Close</button>
+                                    <span class="ms-3 badge {% if profile.verification_status == 'APPROVED' %}bg-success{% else %}bg-danger{% endif %}">{{ profile.verification_status }}</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- End Modal -->
+                    
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="p-5 text-center opacity-50">No users found in the system.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

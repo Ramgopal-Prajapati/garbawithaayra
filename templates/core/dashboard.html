@@ -1,0 +1,168 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Dashboard - Garba with Aayra{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row g-4">
+        <!-- Sidebar Profile -->
+        <div class="col-md-4">
+            <div class="card bg-dark border-secondary p-4 text-center sticky-top" style="top: 100px;">
+                <div class="position-relative d-inline-block mx-auto mb-3" style="width:120px; height:120px;">
+                    {% if profile.profile_photo %}
+                    <img src="{{ profile.profile_photo.url }}" class="rounded-circle w-100 h-100" style="object-fit:cover; border: 3px solid #ff007f;">
+                    {% else %}
+                    <div class="rounded-circle w-100 h-100 bg-secondary d-flex align-items-center justify-content-center" style="border: 3px solid #ff007f;">
+                        <h1>👤</h1>
+                    </div>
+                    {% endif %}
+                </div>
+                <h4 class="fw-bold mb-0">{{ profile.display_name|default:user.email }}</h4>
+                <p class="text-warning small mb-3">@{{ profile.username }}</p>
+                
+                <div class="badge {% if profile.verification_status == 'APPROVED' %}bg-success{% elif profile.verification_status == 'PENDING' %}bg-warning text-dark{% else %}bg-danger{% endif %} mb-3">
+                    Status: {{ profile.get_verification_status_display|default:"Unknown" }}
+                </div>
+                
+                <div class="d-grid gap-2">
+                    <a href="/profile/edit/" class="btn btn-outline-light rounded-pill">✏️ Edit Profile</a>
+                    <a href="/profile/{{ profile.id }}/" class="btn btn-outline-primary rounded-pill">👁️ View Public Profile</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-8">
+            <!-- Matches Section -->
+            <div class="card bg-dark border-secondary p-4 mb-4">
+                <h4 class="fw-bold mb-4 border-bottom border-secondary pb-2">🎉 Your Matches</h4>
+                {% for match in matches %}
+                <div class="card bg-black border-secondary p-3 mb-3">
+                    <div class="d-flex flex-column flex-md-row align-items-md-center gap-3">
+                        {% if match.user_one == profile %}
+                            {% if match.user_two.profile_photo %}
+                            <img src="{{ match.user_two.profile_photo.url }}" class="rounded-circle" style="width:60px;height:60px;object-fit:cover;">
+                            {% else %}
+                            <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center" style="width:60px;height:60px;">👤</div>
+                            {% endif %}
+                        {% else %}
+                            {% if match.user_one.profile_photo %}
+                            <img src="{{ match.user_one.profile_photo.url }}" class="rounded-circle" style="width:60px;height:60px;object-fit:cover;">
+                            {% else %}
+                            <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center" style="width:60px;height:60px;">👤</div>
+                            {% endif %}
+                        {% endif %}
+                        
+                        <div class="flex-grow-1">
+                            <h6 class="mb-0 fw-bold">
+                                {% if match.user_one == profile %}
+                                    {{ match.user_two.display_name }}
+                                {% else %}
+                                    {{ match.user_one.display_name }}
+                                {% endif %}
+                            </h6>
+                            <small class="text-success">Matched!</small>
+                        </div>
+                        <div class="d-flex gap-2 mt-2 mt-md-0 flex-wrap justify-content-end">
+                            <a href="/chat/{{ match.id }}/" class="btn btn-sm btn-primary rounded-pill px-3">💬 Chat</a>
+                            <button onclick="unmatchUser({{ match.id }})" class="btn btn-sm btn-outline-danger rounded-pill px-3">✕ Unmatch</button>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <p class="text-muted text-center py-4">No matches yet. Keep exploring!</p>
+                {% endfor %}
+            </div>
+
+            <!-- Incoming Requests -->
+            <div class="card bg-dark border-secondary p-4 mb-4">
+                <h4 class="fw-bold mb-4 border-bottom border-secondary pb-2">📥 Incoming Requests</h4>
+                {% for req in incoming_requests %}
+                <div class="card bg-black border-secondary p-3 mb-3">
+                    <div class="d-flex flex-column flex-md-row align-items-md-center gap-3">
+                        {% if req.sender.profile_photo %}
+                        <img src="{{ req.sender.profile_photo.url }}" class="rounded-circle" style="width:50px;height:50px;object-fit:cover;">
+                        {% else %}
+                        <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center" style="width:50px;height:50px;">👤</div>
+                        {% endif %}
+                        <div class="flex-grow-1">
+                            <h6 class="mb-0 fw-bold">{{ req.sender.display_name }}</h6>
+                            <small class="text-warning">@{{ req.sender.username }}</small>
+                            <p class="mb-0 small text-muted">Sent you a request to be partners!</p>
+                        </div>
+                        <div class="d-flex gap-2 mt-2 mt-md-0 flex-wrap justify-content-end">
+                            <a href="/profile/{{ req.sender.id }}/" class="btn btn-sm btn-outline-info rounded-pill px-3">👁️ View</a>
+                            <button onclick="handleRequest({{ req.id }}, 'accept')" class="btn btn-sm btn-success rounded-pill px-3">✓ Accept</button>
+                            <button onclick="handleRequest({{ req.id }}, 'decline')" class="btn btn-sm btn-outline-danger rounded-pill px-3">✕ Decline</button>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <p class="text-muted text-center py-3">No pending requests.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+async function handleRequest(requestId, action) {
+    try {
+        const response = await fetch(`/api/requests/${action}/${requestId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+                'Content-Type': 'application/json'
+            }
+        });
+        const data = await response.json();
+        
+        if (response.ok) {
+            alert(data.message || "Success!");
+            window.location.reload();
+        } else {
+            alert(data.error);
+        }
+    } catch (e) {
+        alert("Something went wrong!");
+    }
+}
+
+async function unmatchUser(matchId) {
+    if (!confirm("Are you sure you want to unmatch? This will delete your chat history and set your status back to Finding.")) return;
+    try {
+        const response = await fetch(`/api/requests/unmatch/${matchId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+                'Content-Type': 'application/json'
+            }
+        });
+        const data = await response.json();
+        if (response.ok) {
+            alert(data.message);
+            window.location.reload();
+        } else {
+            alert(data.error);
+        }
+    } catch (e) {
+        alert("Something went wrong!");
+    }
+}
+</script>
+{% endblock %}

@@ -1,0 +1,88 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Sign Up - Garba with Aayra{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card p-5 bg-dark border-secondary shadow-lg">
+                <div class="text-center mb-5">
+                    <h2 class="fw-bold text-primary">Join Garba with Aayra</h2>
+                    <p class="opacity-75">Create your profile to find verified Garba partners.</p>
+                </div>
+
+                {% if error_message %}
+                <div class="alert alert-danger bg-danger text-white border-0">{{ error_message }}</div>
+                {% endif %}
+
+                <form method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    
+                    <!-- Profile Details -->
+                    <h5 class="fw-bold mb-3 text-warning border-bottom border-secondary pb-2">Profile Details</h5>
+                    <div class="row g-3 mb-5">
+                        <div class="col-md-6">
+                            <label class="form-label opacity-75 small mb-1">Full Name <span class="text-danger">*</span></label>
+                            <input type="text" name="display_name" class="form-control bg-dark text-white border-secondary" required value="{{ form_data.display_name }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label opacity-75 small mb-1">Username (Unique handle) <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-dark border-secondary text-warning">@</span>
+                                <input type="text" name="username" class="form-control bg-dark text-white border-secondary" required value="{{ form_data.username }}">
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label opacity-75 small mb-1">Age <span class="text-danger">*</span></label>
+                            <input type="number" name="age" class="form-control bg-dark text-white border-secondary" required min="18" max="100" value="{{ form_data.age }}">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label opacity-75 small mb-1">Bio & Garba Experience <span class="text-danger">*</span></label>
+                            <textarea name="bio" rows="3" class="form-control bg-dark text-white border-secondary" required placeholder="Tell us about yourself and your Garba skills...">{{ form_data.bio }}</textarea>
+                        </div>
+                    </div>
+
+                    <!-- Photos -->
+                    <h5 class="fw-bold mb-3 text-warning border-bottom border-secondary pb-2">Photos & Verification</h5>
+                    <div class="row g-3 mb-5">
+                        <div class="col-md-12">
+                            <label class="form-label opacity-75 small mb-1">Profile Photo <span class="text-danger">*</span></label>
+                            <input type="file" name="profile_photo" class="form-control bg-dark text-white border-secondary" required accept="image/*">
+                            <small class="text-muted">A clear photo of your face.</small>
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label opacity-75 small mb-1">Gallery Photos (Min 3 required) <span class="text-danger">*</span></label>
+                            <input type="file" name="gallery_photos" class="form-control bg-dark text-white border-secondary" required multiple accept="image/*">
+                            <small class="text-muted">Upload at least 3 photos (max 5) of you dancing or attending events. Hold 'Ctrl' to select multiple.</small>
+                        </div>
+                    </div>
+
+                    <!-- Account Details -->
+                    <h5 class="fw-bold mb-3 text-warning border-bottom border-secondary pb-2">Account Login Details</h5>
+                    <div class="row g-3 mb-5">
+                        <div class="col-md-6">
+                            <label class="form-label opacity-75 small mb-1">Email <span class="text-danger">*</span></label>
+                            <input type="email" name="email" class="form-control bg-dark text-white border-secondary" required value="{{ form_data.email }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label opacity-75 small mb-1">Phone Number <span class="text-danger">*</span></label>
+                            <input type="tel" name="phone" class="form-control bg-dark text-white border-secondary" required value="{{ form_data.phone }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label opacity-75 small mb-1">Password <span class="text-danger">*</span></label>
+                            <input type="password" name="password" class="form-control bg-dark text-white border-secondary" required>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100 btn-lg rounded-pill fw-bold">Create Profile & Submit for Verification</button>
+                </form>
+
+                <div class="text-center mt-4 pt-3 border-top border-secondary">
+                    <p class="mb-0 opacity-75">Already have an account? <a href="/login/" class="text-primary text-decoration-none fw-bold">Login</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

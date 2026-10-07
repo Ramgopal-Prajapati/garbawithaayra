@@ -1,0 +1,87 @@
+{% extends 'core/base.html' %}
+
+{% block title %}{{ target_profile.display_name }} - Garba with Aayra{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card p-5 text-center">
+                <div class="position-relative d-inline-block mx-auto mb-4" style="width:150px; height:150px;">
+                    {% if target_profile.profile_photo %}
+                    <img src="{{ target_profile.profile_photo.url }}" class="rounded-circle w-100 h-100" style="object-fit:cover; border: 4px solid #333;">
+                    {% else %}
+                    <div class="rounded-circle w-100 h-100 bg-secondary d-flex align-items-center justify-content-center" style="border: 4px solid #333;">
+                        <h1>👤</h1>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Status Circle Overlap -->
+                    {% if target_profile.status == 'COMMITTED' %}
+                    <div class="position-absolute bottom-0 end-0 bg-danger text-white rounded-pill px-3 py-1 shadow" style="transform: translate(20%, -10%); border: 2px solid #1a0b2e; font-size: 0.8em; font-weight: bold;">
+                        ❤️ Chosen
+                    </div>
+                    {% elif target_profile.status == 'SINGLE' %}
+                    <div class="position-absolute bottom-0 end-0 bg-success text-white rounded-pill px-3 py-1 shadow" style="transform: translate(20%, -10%); border: 2px solid #1a0b2e; font-size: 0.8em; font-weight: bold;">
+                        🔍 Finding
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <div class="d-flex justify-content-center align-items-center gap-2">
+                    <h2 class="fw-bold mb-0">{{ target_profile.display_name }}</h2>
+                    <button onclick="shareProfile('{{ request.build_absolute_uri }}')" class="btn btn-sm btn-outline-warning rounded-circle" title="Share Profile">🔗</button>
+                </div>
+                <p class="text-warning mb-4">{% if target_profile.verification_status == 'APPROVED' %}🟢 Verified Identity{% endif %} <span class="opacity-75">| @{{ target_profile.username }}</span></p>
+                
+                <div class="row text-start mt-4 g-4">
+                    <div class="col-md-6">
+                        <div class="p-3 bg-dark rounded">
+                            <small class="opacity-75 d-block mb-1">📅 Age</small>
+                            <strong>{{ target_profile.age|default:"Not specified" }} years old</strong>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="p-3 bg-dark rounded">
+                            <small class="opacity-75 d-block mb-1">💃 Garba Experience</small>
+                            <strong>{{ target_profile.garba_experience|default:"Not specified" }}</strong>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="p-3 bg-dark rounded">
+                            <small class="opacity-75 d-block mb-1">📝 Bio</small>
+                            <p class="mb-0">{{ target_profile.bio|default:"No bio provided." }}</p>
+                        </div>
+                    </div>
+                </div>
+                
+                {% if target_profile.gallery_photos.all %}
+                <div class="mt-4">
+                    <h5 class="fw-bold mb-3 text-start">Garba Gallery</h5>
+                    <div class="row g-2">
+                        {% for photo in target_profile.gallery_photos.all %}
+                        <div class="col-6 col-md-4">
+                            <img src="{{ photo.image.url }}" class="w-100 rounded" style="aspect-ratio: 1; object-fit: cover; border: 2px solid #333;">
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+                
+                <div class="mt-5">
+                    <a href="javascript:history.back()" class="btn btn-outline-light rounded-pill px-4">← Go Back</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    function shareProfile(url) {
+        navigator.clipboard.writeText(url).then(function() {
+            alert('Profile Link Copied to Clipboard!');
+        }, function(err) {
+            console.error('Could not copy text: ', err);
+        });
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,70 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Edit Profile - Garba with Aayra{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card p-5 bg-dark border-secondary shadow-lg">
+                <div class="text-center mb-5">
+                    <h2 class="fw-bold text-primary">Edit Profile</h2>
+                </div>
+
+                <form method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label opacity-75 small mb-1">Full Name</label>
+                            <input type="text" name="display_name" class="form-control bg-dark text-white border-secondary" value="{{ profile.display_name }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label opacity-75 small mb-1">Age</label>
+                            <input type="number" name="age" class="form-control bg-dark text-white border-secondary" value="{{ profile.age }}">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label opacity-75 small mb-1">Bio</label>
+                            <textarea name="bio" rows="3" class="form-control bg-dark text-white border-secondary">{{ profile.bio }}</textarea>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label opacity-75 small mb-1">Garba Experience</label>
+                            <input type="text" name="garba_experience" class="form-control bg-dark text-white border-secondary" value="{{ profile.garba_experience|default:'' }}">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label opacity-75 small mb-1">Update Profile Photo</label>
+                            <input type="file" name="profile_photo" class="form-control bg-dark text-white border-secondary" accept="image/*">
+                        </div>
+                        <div class="col-12 mt-4">
+                            <h5 class="border-bottom border-secondary pb-2 mb-3">Add to Gallery (Max 5 total)</h5>
+                            <input type="file" name="gallery_photos" class="form-control bg-dark text-white border-secondary" multiple accept="image/*">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100 btn-lg rounded-pill fw-bold">Save Changes</button>
+                    <div class="text-center mt-3">
+                        <a href="/dashboard/" class="text-muted text-decoration-none">Cancel</a>
+                    </div>
+                </form>
+
+                {% if profile.gallery_photos.all %}
+                <div class="mt-5 border-top border-secondary pt-4">
+                    <h5 class="mb-3">Manage Current Gallery Photos</h5>
+                    <div class="row g-2">
+                        {% for photo in profile.gallery_photos.all %}
+                        <div class="col-4 text-center">
+                            <img src="{{ photo.image.url }}" class="w-100 rounded mb-2 border border-secondary" style="aspect-ratio: 1; object-fit: cover;">
+                            <form action="/profile/delete_photo/{{ photo.id }}/" method="POST">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-outline-danger w-100">Delete</button>
+                            </form>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
