@@ -11,10 +11,9 @@
                     <h2 class="fw-bold text-primary">Welcome Back</h2>
                     <p class="opacity-75">Login to Garba with Aayra</p>
                 </div>
-
-                {% if error_message %}
-                <div class="alert alert-danger">{{ error_message }}</div>
-                {% endif %}
+{% if form.errors %}
+<div class="alert alert-danger">Please check your email and password and try again.</div>
+{% endif %}
 
                 <form method="POST">
                     {% csrf_token %}
