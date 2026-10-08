@@ -75,7 +75,7 @@
                         </div>
                     </div>
 
-                    <button type="submit" class="btn btn-primary w-100 btn-lg rounded-pill fw-bold">Create Profile & Submit for Verification</button>
+                  <button type="submit" id="submitBtn" class="btn btn-primary w-100 btn-lg rounded-pill fw-bold">Create Profile</button>
                 </form>
 
                 <div class="text-center mt-4 pt-3 border-top border-secondary">
@@ -85,4 +85,14 @@
         </div>
     </div>
 </div>
+
+
+<script>
+    document.querySelector('form').addEventListener('submit', function(e) {
+        const btn = document.getElementById('submitBtn');
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Uploading Photos to Cloud... Please wait';
+        btn.disabled = true;
+        btn.classList.add('opacity-75');
+    });
+</script>
 {% endblock %}
