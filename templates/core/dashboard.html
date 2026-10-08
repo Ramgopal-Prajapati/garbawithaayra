@@ -164,11 +164,11 @@ async function unmatchUser(matchId) {
         alert("Something went wrong!");
     }
 }
-
 // Auto-refresh dashboard data every 5 seconds silently
 setInterval(async () => {
     try {
-        const response = await fetch(window.location.href);
+        // 'no-store' is super important here so the browser doesn't show old cached data!
+        const response = await fetch(window.location.href, { cache: 'no-store' });
         const html = await response.text();
         const parser = new DOMParser();
         const doc = parser.parseFromString(html, 'text/html');
@@ -176,14 +176,14 @@ setInterval(async () => {
         const currentMain = document.querySelector('.col-md-8');
         const newMain = doc.querySelector('.col-md-8');
         
-        // Only update if there is a change (e.g. new request or match)
+        // Update the dashboard dynamically
         if (currentMain && newMain && currentMain.innerHTML !== newMain.innerHTML) {
             currentMain.innerHTML = newMain.innerHTML;
         }
     } catch (e) {
         console.error("Dashboard auto-refresh failed", e);
     }
-}, 5000);
+}, 3000);
 
     
 </script>
