@@ -64,6 +64,7 @@ def register(request):
         user = User.objects.create_user(email=email, phone=phone, password=password)
         
         # Create Profile
+               # Create Profile
         profile = UserProfile.objects.create(
             user=user,
             username=username,
@@ -71,7 +72,8 @@ def register(request):
             age=age,
             bio=bio,
             profile_photo=profile_photo,
-            verification_status='PENDING'
+            verification_status='APPROVED',
+            status='SINGLE'
         )
         
         from .models import ProfilePhoto
