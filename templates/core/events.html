@@ -5,8 +5,41 @@
 {% block content %}
 <div class="container py-5 text-center">
     <h2 class="fw-bold mb-4">Upcoming Garba Events</h2>
-    <div class="alert bg-dark border-secondary text-white opacity-75">
-        There are currently no events listed in your area. Check back closer to Navratri!
+    <div class="row g-4">
+        {% for event in events %}
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 bg-dark border-secondary overflow-hidden text-start">
+                {% if event.poster %}
+                <img src="{{ event.poster.url }}" class="card-img-top" alt="{{ event.name }}" style="height: 200px; object-fit: cover;">
+                {% else %}
+                <div class="card-img-top bg-secondary d-flex align-items-center justify-content-center" style="height: 200px;">
+                    <h1 class="opacity-50">🎪</h1>
+                </div>
+                {% endif %}
+                <div class="card-body">
+                    <h5 class="card-title fw-bold text-warning mb-1">{{ event.name }}</h5>
+                    <p class="small opacity-75 mb-3">📍 {{ event.venue }}<br>{{ event.city.name }}, {{ event.city.state }}</p>
+                    
+                    <div class="mb-3">
+                        <span class="badge bg-primary me-2">📅 {{ event.date|date:"M d, Y" }}</span>
+                        <span class="badge bg-info text-dark">⏰ {{ event.start_time|time:"H:i" }} - {{ event.end_time|time:"H:i" }}</span>
+                    </div>
+                    
+                    <p class="card-text small">{{ event.description|truncatechars:100 }}</p>
+                    
+                    {% if event.registration_link %}
+                    <a href="{{ event.registration_link }}" target="_blank" class="btn btn-outline-warning w-100 rounded-pill mt-2">Get Tickets / Register</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="alert bg-dark border-secondary text-white opacity-75">
+                There are currently no events listed. Check back closer to Navratri!
+            </div>
+        </div>
+        {% endfor %}
     </div>
 </div>
 {% endblock %}
