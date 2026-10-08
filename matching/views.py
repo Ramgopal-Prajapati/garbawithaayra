@@ -33,6 +33,22 @@ def send_request(request, receiver_id):
             receiver=receiver_profile,
             defaults={'status': 'PENDING'}
         )
+
+                # Send Email Notification asynchronously
+        if receiver_profile.user.email:
+            import threading
+            from django.core.mail import send_mail
+            from django.conf import settings
+            
+            def send_async_email():
+                try:
+                    subject = "New Garba Partner Request! 💃🕺"
+                    message = f"Hi {receiver_profile.display_name},\n\n{sender_profile.display_name} (@{sender_profile.username}) has sent you a connection request for Garba!\n\nLog in to your Garba with Aayra dashboard to accept or decline the request.\n\nKeep Dancing,\nGarba with Aayra Team"
+                    send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [receiver_profile.user.email], fail_silently=True)
+                except Exception as e:
+                    pass
+                    
+            threading.Thread(target=send_async_email).start()
         return JsonResponse({'message': 'Interest sent successfully!'})
         
     except UserProfile.DoesNotExist:
