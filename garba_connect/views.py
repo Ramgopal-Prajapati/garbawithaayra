@@ -2,35 +2,31 @@ from django.shortcuts import render
 from accounts.models import UserProfile
 from events.models import GarbaEvent
 from django.contrib.auth.decorators import login_required
+from django.db.models import Q
 
 def home(request):
     profiles = UserProfile.objects.filter(verification_status='APPROVED').order_by('-created_at')[:6]
     return render(request, 'core/index.html', {'profiles': profiles})
 
 def discover(request):
-    # Get approved and single profiles
-    profiles = UserProfile.objects.filter(
-        verification_status='APPROVED',
-        status='SINGLE'
-    ).exclude(user=request.user if request.user.is_authenticated else None)
+    profiles = UserProfile.objects.filter(status='SINGLE', verification_status='APPROVED')
     
-    # Apply search filters
-    username_q = request.GET.get('username')
-    location_q = request.GET.get('location')
+    search_q = request.GET.get('username')
     
-    from django.db.models import Q
-    if username_q:
-        username_q = username_q.lstrip('@')
-        profiles = profiles.filter(username__icontains=username_q)
-        
-    if location_q:
+    if search_q:
+        # Agar user ne search me @ lagaya hai, toh use hata do
+        search_q = search_q.replace('@', '').strip()
+        # Ab username aur display_name dono me dhoondo
         profiles = profiles.filter(
-            age=location_q # reusing the old location_q param for age just in case, but really we removed location search.
+            Q(username__icontains=search_q) | 
+            Q(display_name__icontains=search_q)
         )
-    
-    # We only exclude the logged in user themselves. The status='SINGLE' already filters out matched users!
+        
+    # Khud ki profile ko search result se hata do
+    if request.user.is_authenticated:
+        profiles = profiles.exclude(user=request.user)
+        
     return render(request, 'core/discover.html', {'profiles': profiles})
-
 @login_required
 def dashboard(request):
     try:
