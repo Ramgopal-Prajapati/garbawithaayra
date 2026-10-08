@@ -169,17 +169,24 @@
     async function fetchMessages() {
         try {
             const response = await fetch(window.location.href);
+            
+            // Agar chat delete/unmatch ho gayi ho toh 404 error aayega
+            if (response.status === 404 || response.status === 403) {
+                alert("The other user has unmatched or left the chat.");
+                window.location.href = "/dashboard/";
+                return;
+            }
+            
             const html = await response.text();
             const parser = new DOMParser();
             const doc = parser.parseFromString(html, 'text/html');
             const newChatBox = doc.getElementById('chatBox');
             
-            // Only update DOM if there are new messages to prevent flicker
-            if (chatBox.innerHTML !== newChatBox.innerHTML) {
+            // Agar chat exist karti hai toh update karo
+            if (newChatBox && chatBox.innerHTML !== newChatBox.innerHTML) {
                 const isScrolledToBottom = chatBox.scrollHeight - chatBox.clientHeight <= chatBox.scrollTop + 50;
                 chatBox.innerHTML = newChatBox.innerHTML;
                 
-                // Auto-scroll if they were already at the bottom
                 if (isScrolledToBottom) {
                     chatBox.scrollTop = chatBox.scrollHeight;
                 }
