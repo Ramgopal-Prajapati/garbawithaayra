@@ -9,23 +9,11 @@
         <span class="badge bg-danger rounded-pill px-3 py-2">Superuser Access Only</span>
     </div>
 
-    <div class="row mb-5 g-4">
-        <div class="col-md-4">
+    <div class="row mb-5 g-4 justify-content-center">
+        <div class="col-md-6">
             <div class="card bg-dark border-secondary p-4 text-center h-100">
                 <h1 class="display-4 fw-bold text-primary">{{ users.count }}</h1>
                 <p class="text-muted mb-0">Total Registered Users</p>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card bg-dark border-secondary p-4 text-center h-100">
-                <h1 class="display-4 fw-bold text-warning">{{ pending_count }}</h1>
-                <p class="text-muted mb-0">Pending Verification</p>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card bg-dark border-secondary p-4 text-center h-100">
-                <h1 class="display-4 fw-bold text-success">{{ approved_count }}</h1>
-                <p class="text-muted mb-0">Approved Users</p>
             </div>
         </div>
     </div>
@@ -37,8 +25,7 @@
                     <tr>
                         <th class="p-3">User Details</th>
                         <th class="p-3">Age & Joined</th>
-                        <th class="p-3">Status</th>
-                        <th class="p-3">Actions</th>
+                        <th class="p-3 text-end">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -62,22 +49,9 @@
                             <small class="d-block">📅 Age: {{ profile.age|default:"N/A" }}</small>
                             <small class="text-muted">Joined: {{ profile.created_at|date:"M d, Y" }}</small>
                         </td>
-                        <td class="p-3">
-                            {% if profile.verification_status == 'APPROVED' %}
-                            <span class="badge bg-success rounded-pill">Approved</span>
-                            {% elif profile.verification_status == 'PENDING' %}
-                            <span class="badge bg-warning text-dark rounded-pill">Pending</span>
-                            {% else %}
-                            <span class="badge bg-danger rounded-pill">Rejected</span>
-                            {% endif %}
-                        </td>
-                        <td class="p-3">
+                        <td class="p-3 text-end">
                             <button type="button" class="btn btn-sm btn-outline-light rounded-pill" data-bs-toggle="modal" data-bs-target="#reviewModal{{ profile.id }}">Review</button>
-                            {% if profile.verification_status == 'PENDING' %}
-                            <a href="/mainadmin/approve/{{ profile.id }}/" class="btn btn-sm btn-success rounded-pill">Approve</a>
-                            <a href="/mainadmin/reject/{{ profile.id }}/" class="btn btn-sm btn-warning rounded-pill text-dark">Reject</a>
-                            {% endif %}
-                            <a href="/mainadmin/delete/{{ profile.user.id }}/" class="btn btn-sm btn-danger rounded-pill" onclick="return confirm('Are you sure you want to permanently delete this user? This cannot be undone.');">Delete</a>
+                            <a href="/mainadmin/delete/{{ profile.user.id }}/" class="btn btn-sm btn-danger rounded-pill ms-2" onclick="return confirm('Are you sure you want to permanently delete this user? This cannot be undone.');">Delete</a>
                         </td>
                     </tr>
                     
@@ -117,13 +91,7 @@
                                     </div>
                                 </div>
                                 <div class="modal-footer border-top-0 justify-content-center bg-white rounded-bottom">
-                                    {% if profile.verification_status == 'PENDING' %}
-                                    <a href="/mainadmin/approve/{{ profile.id }}/" class="btn btn-success px-4 rounded-pill fw-bold">✓ Approve User</a>
-                                    <a href="/mainadmin/reject/{{ profile.id }}/" class="btn btn-warning px-4 rounded-pill fw-bold text-dark">✕ Reject User</a>
-                                    {% else %}
                                     <button type="button" class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">Close</button>
-                                    <span class="ms-3 badge {% if profile.verification_status == 'APPROVED' %}bg-success{% else %}bg-danger{% endif %}">{{ profile.verification_status }}</span>
-                                    {% endif %}
                                 </div>
                             </div>
                         </div>
