@@ -101,6 +101,35 @@
                 <p class="text-muted text-center py-3">No pending requests.</p>
                 {% endfor %}
             </div>
+
+
+
+                        <!-- Outgoing Requests -->
+            <div class="card bg-dark border-secondary p-4 mb-4">
+                <h4 class="fw-bold mb-4 border-bottom border-secondary pb-2">📤 Sent Requests</h4>
+                {% for req in outgoing_requests %}
+                <div class="card bg-black border-secondary p-3 mb-3">
+                    <div class="d-flex flex-column flex-md-row align-items-md-center gap-3">
+                        {% if req.receiver.profile_photo %}
+                        <img src="{{ req.receiver.profile_photo.url }}" class="rounded-circle" style="width:50px;height:50px;object-fit:cover;">
+                        {% else %}
+                        <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center" style="width:50px;height:50px;">👤</div>
+                        {% endif %}
+                        <div class="flex-grow-1">
+                            <h6 class="mb-0 fw-bold">{{ req.receiver.display_name }}</h6>
+                            <small class="text-warning">@{{ req.receiver.username }}</small>
+                            <p class="mb-0 small text-muted">Awaiting their response...</p>
+                        </div>
+                        <div class="d-flex gap-2 mt-2 mt-md-0 flex-wrap justify-content-end">
+                            <a href="/profile/{{ req.receiver.id }}/" class="btn btn-sm btn-outline-info rounded-pill px-3">👁️ View</a>
+                            <button onclick="handleRequest({{ req.id }}, 'withdraw')" class="btn btn-sm btn-outline-danger rounded-pill px-3">↩️ Withdraw</button>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <p class="text-muted text-center py-3">You haven't sent any requests yet.</p>
+                {% endfor %}
+            </div>
         </div>
     </div>
 </div>
