@@ -3,10 +3,22 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from matching.models import Match
 from .models import Conversation, Message
+import threading
+from django.core.mail import send_mail
+from django.conf import settings
+
+def notify_user_async(user_profile, title, body):
+    if user_profile and user_profile.user.email:
+        def send_async():
+            try:
+                full_message = f"Hi {user_profile.display_name},\n\n{body}\n\nCheck your dashboard for any message/request/accept/reject/etc.\n\nKeep Dancing,\nGarba with Aayra Team"
+                send_mail(title, full_message, settings.DEFAULT_FROM_EMAIL, [user_profile.user.email], fail_silently=True)
+            except Exception as e:
+                pass
+        threading.Thread(target=send_async).start()
 
 @login_required
 def chat_view(request, match_id):
-    from django.db.models import Q
     match = get_object_or_404(Match, id=match_id)
     
     # Ensure user is part of the match
@@ -43,6 +55,11 @@ def send_message(request, match_id):
                 message=text,
                 attachment=attachment
             )
+            
+            # Send notification to the other user
+            other_user = match.user_two if match.user_one == request.user.profile else match.user_one
+            notify_user_async(other_user, "New Garba Message! 💬", f"You have received a new message from {request.user.profile.display_name}.")
+            
             return JsonResponse({
                 'status': 'success',
                 'message': msg.message,
