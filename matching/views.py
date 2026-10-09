@@ -120,3 +120,18 @@ def unmatch(request, match_id):
         return JsonResponse({'message': 'Unmatched successfully.'})
     except Match.DoesNotExist:
         return JsonResponse({'error': 'Match not found'}, status=404)
+
+
+
+
+
+
+@login_required
+@require_POST
+def withdraw_request(request, request_id):
+    try:
+        conn_req = ConnectionRequest.objects.get(id=request_id, sender=request.user.profile, status='PENDING')
+        conn_req.delete()
+        return JsonResponse({'message': 'Request withdrawn successfully'})
+    except ConnectionRequest.DoesNotExist:
+        return JsonResponse({'error': 'Request not found'}, status=404)
